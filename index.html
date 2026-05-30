@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Megaline Plan Recommender — Belem Cisneros Diaz</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Jost:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #f5f0ea;
+  --bg2:      #ede8e0;
+  --surface:  #ffffff;
+  --border:   #d8d0c4;
+  --text:     #1e1a14;
+  --mid:      #4a4438;
+  --muted:    #8a8070;
+
+  --forest:   #2a4a30;
+  --bottle:   #1e3828;
+  --teal:     #2a5848;
+  --sage:     #4a7858;
+  --sage-lt:  #e8f0e8;
+
+  --wine:     #5a1e28;
+  --plum:     #7a2a38;
+  --rose:     #a85868;
+  --blush:    #d4a0a8;
+  --blush-lt: #f5e8e8;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Jost',sans-serif;
+  font-weight:300;
+  line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  background:rgba(245,240,234,0.96);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+}
+.nav-inner{
+  max-width:1040px;margin:0 auto;
+  padding:0 40px;height:56px;
+  display:flex;align-items:center;
+  justify-content:space-between;
+}
+.nav-logo{
+  font-family:'DM Serif Display',serif;
+  font-size:15px;color:var(--forest);
+  text-decoration:none;letter-spacing:0.01em;
+}
+.nav-links{
+  display:flex;gap:4px;list-style:none;
+  overflow-x:auto;scrollbar-width:none;
+}
+.nav-links::-webkit-scrollbar{display:none;}
+.nav-links a{
+  font-size:11px;font-weight:500;
+  letter-spacing:0.08em;text-transform:uppercase;
+  text-decoration:none;color:var(--muted);
+  padding:6px 12px;border-radius:20px;
+  border:1px solid transparent;
+  transition:all 0.18s;white-space:nowrap;
+}
+.nav-links a:hover{
+  color:var(--forest);
+  border-color:var(--border);
+  background:var(--surface);
+}
+
+/* HERO */
+.hero{
+  min-height:100vh;
+  display:flex;align-items:center;
+  padding:100px 40px 80px;
+  position:relative;overflow:hidden;
+  background:var(--bg);
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 55% 60% at 5% 50%, rgba(42,74,48,0.07) 0%,transparent 60%),
+    radial-gradient(ellipse 45% 50% at 95% 50%, rgba(90,30,40,0.06) 0%,transparent 60%);
+}
+/* vertical rule decoration */
+.hero::after{
+  content:'';
+  position:absolute;
+  left:calc(50% + 340px);top:80px;bottom:80px;
+  width:1px;background:var(--border);
+  display:none;
+}
+.hero-inner{
+  max-width:1040px;margin:0 auto;width:100%;
+  display:grid;grid-template-columns:1fr 380px;
+  gap:60px;align-items:center;
+  position:relative;z-index:1;
+}
+.hero-eyebrow{
+  font-size:10px;font-weight:600;
+  letter-spacing:0.28em;text-transform:uppercase;
+  color:var(--sage);margin-bottom:20px;
+  display:flex;align-items:center;gap:10px;
+}
+.hero-eyebrow::before{
+  content:'';display:inline-block;
+  width:24px;height:1px;background:var(--sage);
+}
+.hero h1{
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(40px,5vw,62px);
+  font-weight:400;line-height:1.08;
+  color:var(--text);margin-bottom:24px;
+  letter-spacing:-0.01em;
+}
+.hero h1 em{
+  font-style:italic;color:var(--wine);
+}
+.hero-desc{
+  font-size:16px;font-weight:300;
+  color:var(--mid);max-width:480px;
+  margin-bottom:32px;line-height:1.8;
+}
+.badges{
+  display:flex;flex-wrap:wrap;gap:8px;
+  margin-bottom:36px;
+}
+.badge{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;font-weight:500;
+  padding:5px 13px;border-radius:20px;
+  letter-spacing:0.04em;border:1px solid;
+}
+.badge.g{color:var(--forest);border-color:rgba(42,74,48,0.35);background:var(--sage-lt);}
+.badge.w{color:var(--wine);border-color:rgba(90,30,40,0.3);background:var(--blush-lt);}
+.badge.t{color:var(--teal);border-color:rgba(42,88,72,0.3);background:#e8f2ee;}
+
+/* Hero stats panel */
+.hero-panel{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;padding:32px;
+  box-shadow:0 4px 24px rgba(30,26,20,0.08);
+}
+.panel-title{
+  font-size:10px;font-weight:600;
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:24px;
+  padding-bottom:14px;
+  border-bottom:1px solid var(--border);
+}
+.panel-stat{
+  padding:14px 0;
+  border-bottom:1px solid var(--bg2);
+  display:flex;justify-content:space-between;
+  align-items:baseline;
+}
+.panel-stat:last-child{border-bottom:none;}
+.ps-label{
+  font-size:12px;font-weight:400;color:var(--muted);
+}
+.ps-val{
+  font-family:'DM Serif Display',serif;
+  font-size:24px;color:var(--text);
+}
+.ps-val.green{color:var(--forest);}
+.ps-val.wine{color:var(--wine);}
+
+/* PAGE */
+.page{max-width:1040px;margin:0 auto;padding:0 40px;}
+
+/* SECTION */
+section{padding:80px 0;scroll-margin-top:56px;}
+.sec-eye{
+  font-size:10px;font-weight:600;
+  letter-spacing:0.25em;text-transform:uppercase;
+  color:var(--sage);margin-bottom:12px;
+  display:flex;align-items:center;gap:10px;
+}
+.sec-eye::before{
+  content:'';display:inline-block;
+  width:18px;height:1px;background:var(--sage);
+}
+h2{
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(28px,4vw,42px);
+  font-weight:400;line-height:1.15;
+  color:var(--text);margin-bottom:20px;
+}
+h2 em{font-style:italic;color:var(--wine);}
+h3{
+  font-size:11px;font-weight:600;
+  letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--teal);margin:36px 0 14px;
+}
+p{font-size:15px;color:var(--mid);margin-bottom:14px;line-height:1.8;}
+strong{font-weight:600;color:var(--text);}
+
+/* DIVIDER */
+.divider{border:none;border-top:1px solid var(--border);}
+
+/* CONCEPT */
+.concept{
+  background:var(--surface);border:1px solid var(--border);
+  border-left:4px solid var(--teal);
+  border-radius:0 14px 14px 0;
+  padding:20px 24px;margin:20px 0;
+}
+.c-lbl{
+  font-size:9px;font-weight:600;letter-spacing:0.2em;
+  text-transform:uppercase;color:var(--teal);margin-bottom:8px;
+}
+.concept p{font-size:14px;margin:0;}
+
+/* NOTE BOX */
+.note-box{
+  background:var(--blush-lt);
+  border:1px solid rgba(168,88,104,0.25);
+  border-left:4px solid var(--rose);
+  border-radius:0 14px 14px 0;
+  padding:20px 24px;margin:24px 0;
+}
+.note-box .n-lbl{
+  font-size:9px;font-weight:600;
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--wine);margin-bottom:8px;
+}
+.note-box p{font-size:14px;color:var(--mid);margin:0;}
+.note-box a{color:var(--wine);font-weight:600;}
+
+/* TABLE */
+.tw{overflow-x:auto;border-radius:14px;border:1px solid var(--border);margin:20px 0;box-shadow:0 2px 8px rgba(30,26,20,0.05);}
+table{width:100%;border-collapse:collapse;background:var(--surface);font-size:13.5px;}
+thead th{
+  font-size:10px;font-weight:600;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:#fff;background:var(--forest);
+  padding:13px 18px;text-align:left;white-space:nowrap;
+}
+td{padding:12px 18px;border-bottom:1px solid var(--bg2);color:var(--mid);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:nth-child(even) td{background:var(--bg);}
+td:first-child{font-weight:600;color:var(--text);}
+.td-win{color:var(--forest)!important;font-weight:600;}
+.td-lose{color:var(--rose)!important;}
+.td-yes{color:var(--forest);}
+.td-no{color:var(--rose);}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:20px 0;}
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:24px;
+  box-shadow:0 2px 8px rgba(30,26,20,0.04);
+}
+.c-ico{font-size:26px;margin-bottom:10px;}
+.c-ttl{
+  font-family:'DM Serif Display',serif;
+  font-size:16px;font-weight:400;
+  color:var(--text);margin-bottom:8px;
+}
+.card p{font-size:13px;margin:0;line-height:1.65;}
+
+/* METHODOLOGY */
+.method-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:14px;margin:24px 0;
+}
+.mc{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:24px;
+  border-top:3px solid var(--border);
+  transition:border-top-color 0.2s;
+}
+.mc:nth-child(1){border-top-color:var(--forest);}
+.mc:nth-child(2){border-top-color:var(--teal);}
+.mc:nth-child(3){border-top-color:var(--sage);}
+.mc:nth-child(4){border-top-color:var(--wine);}
+.mc:nth-child(5){border-top-color:var(--plum);}
+.mc:nth-child(6){border-top-color:var(--rose);}
+.mc-num{
+  font-family:'DM Serif Display',serif;
+  font-size:40px;color:var(--border);
+  line-height:1;margin-bottom:12px;
+}
+.mc-ttl{
+  font-size:11px;font-weight:600;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--text);margin-bottom:8px;
+}
+.mc-desc{font-size:13px;color:var(--muted);margin:0;line-height:1.65;}
+
+/* RESULT HERO */
+.result-hero{
+  background:var(--forest);
+  border-radius:20px;padding:48px;
+  text-align:center;margin:24px 0;
+  position:relative;overflow:hidden;
+}
+.result-hero::before{
+  content:'';position:absolute;
+  top:-60px;right:-60px;
+  width:250px;height:250px;border-radius:50%;
+  background:rgba(255,255,255,0.04);
+}
+.rh-lbl{
+  font-size:10px;font-weight:600;
+  letter-spacing:0.22em;text-transform:uppercase;
+  color:rgba(255,255,255,0.5);margin-bottom:12px;
+}
+.rh-num{
+  font-family:'DM Serif Display',serif;
+  font-size:80px;font-weight:400;
+  color:#fff;line-height:1;margin-bottom:10px;
+}
+.rh-sub{font-size:14px;color:rgba(255,255,255,0.6);}
+.rh-tag{
+  display:inline-block;margin-top:16px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;padding:6px 16px;border-radius:20px;
+  background:rgba(255,255,255,0.1);
+  color:rgba(255,255,255,0.7);
+  border:1px solid rgba(255,255,255,0.15);
+}
+
+/* STAT ROW */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0;}
+.stat-c{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:20px 16px;text-align:center;
+}
+.s-n{
+  font-family:'DM Serif Display',serif;
+  font-size:28px;color:var(--wine);
+  line-height:1;margin-bottom:5px;
+}
+.s-l{
+  font-size:10px;font-weight:600;
+  letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);
+}
+
+/* FEATURE BARS */
+.feat-bars{margin:20px 0;}
+.feat-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+.feat-name{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;font-weight:500;
+  color:var(--text);width:80px;flex-shrink:0;
+}
+.feat-bar-wrap{
+  flex:1;background:var(--bg2);
+  border-radius:6px;height:28px;
+  overflow:hidden;border:1px solid var(--border);
+}
+.feat-bar{
+  height:100%;border-radius:6px;
+  display:flex;align-items:center;
+  padding-left:12px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;font-weight:500;color:#fff;
+}
+.fb1{background:linear-gradient(90deg,var(--forest),var(--teal));}
+.fb2{background:linear-gradient(90deg,var(--wine),var(--plum));}
+.fb3{background:linear-gradient(90deg,var(--teal),var(--sage));}
+.fb4{background:linear-gradient(90deg,var(--sage),#6a9870);}
+
+/* PULL QUOTE */
+.pq{
+  background:var(--surface);border:1px solid var(--border);
+  border-left:4px solid var(--wine);
+  border-radius:0 14px 14px 0;
+  padding:24px 28px;margin:28px 0;
+  position:relative;overflow:hidden;
+}
+.pq::before{
+  content:'"';position:absolute;
+  top:-10px;left:12px;
+  font-family:'DM Serif Display',serif;
+  font-size:100px;color:var(--blush-lt);line-height:1;
+}
+.pq p{
+  font-family:'DM Serif Display',serif;
+  font-size:17px;font-style:italic;
+  color:var(--text);margin:0;position:relative;z-index:1;
+}
+
+/* CTA */
+.cta-section{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:48px;text-align:center;
+}
+.cta-btn{
+  display:inline-block;
+  font-size:12px;font-weight:600;
+  letter-spacing:0.1em;text-transform:uppercase;
+  text-decoration:none;
+  padding:14px 32px;border-radius:30px;margin:8px;
+  transition:all 0.2s;
+}
+.btn-p{background:var(--forest);color:#fff;border:1px solid var(--teal);}
+.btn-p:hover{background:var(--teal);}
+.btn-s{background:transparent;color:var(--wine);border:1px solid var(--wine);}
+.btn-s:hover{background:var(--wine);color:#fff;}
+
+/* FOOTER */
+footer{
+  background:var(--bottle);
+  padding:48px 40px;text-align:center;
+  position:relative;
+}
+footer::before{
+  content:'';position:absolute;
+  top:0;left:50%;transform:translateX(-50%);
+  width:120px;height:2px;
+  background:linear-gradient(to right,transparent,var(--blush),transparent);
+}
+.ft-name{
+  font-family:'DM Serif Display',serif;
+  font-size:22px;font-style:italic;
+  color:var(--blush);margin-bottom:6px;
+}
+.ft-sub{
+  font-size:11px;font-weight:500;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:rgba(255,255,255,0.3);
+}
+
+@media(max-width:768px){
+  .hero-inner{grid-template-columns:1fr;}
+  .hero-panel{display:none;}
+  .g2,.g3,.method-grid,.stat-row{grid-template-columns:1fr;}
+  .page,.hero{padding-left:20px;padding-right:20px;}
+  .nav-inner{padding:0 20px;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#hero" class="nav-logo">Belem Cisneros Diaz</a>
+    <ul class="nav-links">
+      <li><a href="#problema">Problema</a></li>
+      <li><a href="#datos">Datos</a></li>
+      <li><a href="#metodologia">Metodología</a></li>
+      <li><a href="#resultados">Resultados</a></li>
+      <li><a href="#hallazgos">Hallazgos</a></li>
+      <li><a href="#proyecto">Proyecto</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero" id="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-eyebrow">Machine Learning · Clasificación Supervisada</div>
+      <h1>Megaline<br><em>Plan Recommender</em></h1>
+      <p class="hero-desc">Modelo de clasificación que predice el plan móvil óptimo — Smart o Ultra — basado en el comportamiento mensual de los clientes de Megaline.</p>
+      <div class="badges">
+        <span class="badge g">Python 3.11</span>
+        <span class="badge w">scikit-learn</span>
+        <span class="badge g">Random Forest</span>
+        <span class="badge t">pandas · matplotlib</span>
+        <span class="badge w">TripleTen Sprint 10</span>
+      </div>
+    </div>
+    <div class="hero-panel">
+      <div class="panel-title">Resultados del modelo</div>
+      <div class="panel-stat">
+        <span class="ps-label">Accuracy en test</span>
+        <span class="ps-val green">81.8%</span>
+      </div>
+      <div class="panel-stat">
+        <span class="ps-label">Umbral requerido</span>
+        <span class="ps-val">75.0%</span>
+      </div>
+      <div class="panel-stat">
+        <span class="ps-label">Modelo ganador</span>
+        <span class="ps-val" style="font-size:16px">Random Forest</span>
+      </div>
+      <div class="panel-stat">
+        <span class="ps-label">Mejora vs baseline</span>
+        <span class="ps-val wine">+12.4 pts</span>
+      </div>
+      <div class="panel-stat">
+        <span class="ps-label">Observaciones</span>
+        <span class="ps-val" style="font-size:16px">3,214</span>
+      </div>
+      <div class="panel-stat">
+        <span class="ps-label">Feature principal</span>
+        <span class="ps-val" style="font-size:14px;font-family:'JetBrains Mono',monospace">mb_used</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- PROBLEMA -->
+<section id="problema">
+  <div class="sec-eye">El problema de negocio</div>
+  <h2>Clientes en planes que ya no <em>les corresponden</em></h2>
+  <p>Megaline tiene miles de clientes activos en planes heredados que no reflejan su uso real. El equipo comercial necesita una herramienta que identifique automáticamente qué plan es el correcto para cada usuario.</p>
+  <p>Una recomendación incorrecta tiene un costo doble: el cliente paga de más y eventualmente cancela, o usa más de lo que paga y Megaline pierde margen.</p>
+
+  <div class="g2">
+    <div class="card">
+      <div class="c-ico">📱</div>
+      <div class="c-ttl">Plan Smart</div>
+      <p>Para usuarios de uso moderado. Menor costo mensual. El <strong>69.4%</strong> de los usuarios activos está en este plan.</p>
+    </div>
+    <div class="card">
+      <div class="c-ico">⚡</div>
+      <div class="c-ttl">Plan Ultra</div>
+      <p>Para usuarios de uso intensivo. Mayor capacidad y costo. El <strong>30.6%</strong> de los usuarios activos pertenece a este segmento.</p>
+    </div>
+  </div>
+
+  <div class="pq">
+    <p>Un modelo que recomienda el plan correcto desde el primer mes reduce la fricción del cliente y aumenta el margen operativo sin incrementar el costo de adquisición.</p>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- DATOS -->
+<section id="datos">
+  <div class="sec-eye">El dataset</div>
+  <h2>Comportamiento mensual de <em>3,214 usuarios</em></h2>
+  <p>Cada observación representa el historial mensual de un suscriptor. El dataset no requirió limpieza — sin valores nulos ni duplicados.</p>
+
+  <div class="tw">
+    <table>
+      <thead>
+        <tr><th>Variable</th><th>Tipo</th><th>Descripción</th><th>Media</th><th>Std</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>calls</td><td>Numérica</td><td>Número de llamadas en el mes</td><td>63.04</td><td>33.24</td></tr>
+        <tr><td>minutes</td><td>Numérica</td><td>Duración total de llamadas en minutos</td><td>438.21</td><td>234.57</td></tr>
+        <tr><td>messages</td><td>Numérica</td><td>Mensajes de texto enviados</td><td>38.28</td><td>36.15</td></tr>
+        <tr><td>mb_used</td><td>Numérica</td><td>Tráfico de internet en MB</td><td>17,207</td><td>7,570</td></tr>
+        <tr><td>is_ultra</td><td>Binaria</td><td>Plan actual: Ultra (1) o Smart (0)</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Diferencias por plan</h3>
+  <div class="tw">
+    <table>
+      <thead>
+        <tr><th>Variable</th><th>Smart (media)</th><th>Ultra (media)</th><th>Diferencia</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>calls</td><td>58.5</td><td class="td-win">73.4</td><td>+25%</td></tr>
+        <tr><td>minutes</td><td>405.9</td><td class="td-win">511.2</td><td>+26%</td></tr>
+        <tr><td>messages</td><td>33.4</td><td class="td-win">49.4</td><td>+48%</td></tr>
+        <tr><td>mb_used</td><td>16,208</td><td class="td-win">19,469</td><td>+20%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- METODOLOGÍA -->
+<section id="metodologia">
+  <div class="sec-eye">Metodología</div>
+  <h2>El proceso de <em>construcción</em></h2>
+
+  <div class="method-grid">
+    <div class="mc">
+      <div class="mc-num">01</div>
+      <div class="mc-ttl">Exploración</div>
+      <p class="mc-desc">Estadísticas descriptivas, distribuciones por plan, matriz de correlación. Identificación del desbalance 69/31.</p>
+    </div>
+    <div class="mc">
+      <div class="mc-num">02</div>
+      <div class="mc-ttl">Segmentación</div>
+      <p class="mc-desc">Split estratificado 60/20/20. Stratify garantiza la misma proporción de clases en los tres conjuntos.</p>
+    </div>
+    <div class="mc">
+      <div class="mc-num">03</div>
+      <div class="mc-ttl">Decision Tree</div>
+      <p class="mc-desc">Bucle max_depth 1–15. Mejor: depth=5, accuracy validación=0.7900. Overfitting visible a partir de depth=6.</p>
+    </div>
+    <div class="mc">
+      <div class="mc-num">04</div>
+      <div class="mc-ttl">Random Forest</div>
+      <p class="mc-desc">Grid de 30 combinaciones. Mejor: 30 árboles, depth=7, accuracy=0.7963. Modelo ganador.</p>
+    </div>
+    <div class="mc">
+      <div class="mc-num">05</div>
+      <div class="mc-ttl">Logistic Reg.</div>
+      <p class="mc-desc">Bucle de C con normalización via Pipeline. Mejor: C=0.1, accuracy=0.7449. No supera el umbral.</p>
+    </div>
+    <div class="mc">
+      <div class="mc-num">06</div>
+      <div class="mc-ttl">Evaluación</div>
+      <p class="mc-desc">Modelo reentrenado con train+validation. Evaluado una sola vez en test. Prueba de cordura vs baselines.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- RESULTADOS -->
+<section id="resultados">
+  <div class="sec-eye">Resultados</div>
+  <h2>Random Forest — <em>modelo ganador</em></h2>
+
+  <div class="result-hero">
+    <div class="rh-lbl">Accuracy en test set</div>
+    <div class="rh-num">81.8%</div>
+    <div class="rh-sub">Supera el umbral requerido de 75%</div>
+    <div class="rh-tag">n_estimators=30 · max_depth=7 · random_state=42</div>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead>
+        <tr><th>Modelo</th><th>Acc. Validación</th><th>Acc. Test</th><th>Supera 0.75</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-win">Random Forest</td>
+          <td class="td-win">0.7963</td>
+          <td class="td-win">0.8180</td>
+          <td class="td-yes">✓</td>
+        </tr>
+        <tr>
+          <td>Decision Tree</td>
+          <td>0.7900</td>
+          <td>—</td>
+          <td class="td-yes">✓</td>
+        </tr>
+        <tr>
+          <td>Logistic Regression</td>
+          <td class="td-lose">0.7449</td>
+          <td>—</td>
+          <td class="td-no">✗</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-c"><div class="s-n">69.4%</div><div class="s-l">Baseline trivial</div></div>
+    <div class="stat-c"><div class="s-n">81.8%</div><div class="s-l">Modelo final</div></div>
+    <div class="stat-c"><div class="s-n">+12.4</div><div class="s-l">Puntos de mejora</div></div>
+    <div class="stat-c"><div class="s-n">0.75</div><div class="s-l">Umbral requerido</div></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- HALLAZGOS -->
+<section id="hallazgos">
+  <div class="sec-eye">Hallazgos</div>
+  <h2>Lo que los datos <em>revelan</em></h2>
+
+  <h3>Importancia de features</h3>
+  <div class="feat-bars">
+    <div class="feat-row">
+      <div class="feat-name">mb_used</div>
+      <div class="feat-bar-wrap"><div class="feat-bar fb1" style="width:74.6%">37.3%</div></div>
+    </div>
+    <div class="feat-row">
+      <div class="feat-name">minutes</div>
+      <div class="feat-bar-wrap"><div class="feat-bar fb2" style="width:49.6%">24.8%</div></div>
+    </div>
+    <div class="feat-row">
+      <div class="feat-name">calls</div>
+      <div class="feat-bar-wrap"><div class="feat-bar fb3" style="width:41.6%">20.8%</div></div>
+    </div>
+    <div class="feat-row">
+      <div class="feat-name">messages</div>
+      <div class="feat-bar-wrap"><div class="feat-bar fb4" style="width:34.2%">17.1%</div></div>
+    </div>
+  </div>
+
+  <div class="g3">
+    <div class="card">
+      <div class="c-ttl">mb_used domina (37.3%)</div>
+      <p>El consumo de datos es el predictor más fuerte del plan Ultra. Supera a llamadas y mensajes combinados.</p>
+    </div>
+    <div class="card">
+      <div class="c-ttl">Relaciones no lineales</div>
+      <p>La Regresión Logística no supera el umbral — el comportamiento de uso no sigue patrones lineales simples.</p>
+    </div>
+    <div class="card">
+      <div class="c-ttl">Recomendación de negocio</div>
+      <p>Usuarios con mb_used en el percentil 75 son los candidatos más probables para migrar a Ultra con éxito.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- PROYECTO -->
+<section id="proyecto">
+  <div class="sec-eye">El proyecto</div>
+  <h2>Código y <em>documentación</em></h2>
+
+  <div class="note-box">
+    <div class="n-lbl">📋 Nota sobre el notebook</div>
+    <p>El notebook principal <strong>megaline_plan_recommender.ipynb</strong> contiene el análisis completo con gráficas y outputs. GitHub no puede renderizarlo directamente debido al peso de las visualizaciones. Para verlo ejecutado, descárgalo desde el repositorio y ábrelo en Jupyter o VSCode. El archivo <a href="https://github.com/he1109-ci3l0/megaline-plan-recommender/blob/main/megaline_plan_recommender_clean.ipynb"><strong>megaline_plan_recommender_clean.ipynb</strong></a> es una versión sin outputs — visible directamente en GitHub.</p>
+  </div>
+
+  <div class="cta-section">
+    <p style="font-size:16px;color:var(--text);margin-bottom:8px;font-family:'DM Serif Display',serif;">Desarrollado como proyecto final del Sprint 10</p>
+    <p style="color:var(--muted);margin-bottom:28px;">Introducción a Machine Learning · TripleTen Data Science</p>
+    <a href="https://github.com/he1109-ci3l0/megaline-plan-recommender" class="cta-btn btn-p" target="_blank">Ver repositorio en GitHub</a>
+    <a href="https://github.com/he1109-ci3l0/megaline-plan-recommender/blob/main/megaline_plan_recommender_clean.ipynb" class="cta-btn btn-s" target="_blank">Ver notebook limpio</a>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <div class="ft-name">Belem Cisneros Diaz</div>
+  <div class="ft-sub">Data Science · Machine Learning · Python</div>
+</footer>
+
+</body>
+</html>
